@@ -28,7 +28,7 @@ struct line {
 
 	line(double aa, double bb, double cc) : a(aa), b(bb), c(cc) {}
 
-	double dist(double x, double y) const {
+	double dist(vec p) const {
 		// TODO
 		return 1;
 	}
@@ -37,6 +37,17 @@ struct line {
 		return vec(-b, a).angle();
 	}
 
+};
+
+struct segment {
+	vec a, b;
+
+	segment(vec pa, vec pb) : a(pa), b(pb), {}
+
+	double dist(vec p) const {
+		// TODO
+		return 1;
+	}
 };
 
 struct circle {
@@ -55,6 +66,18 @@ struct circpoint {
 
 	vec pos() const {
 		return c.c + vec(c.r * cos(theta), c.r * sin(theta));
+	}
+};
+
+struct circarc {
+	circle c;
+	double theta1, theta2;
+
+	circarc(circle cc, double tha, double thb) : c(cc), theta1(tha), theta2(thb) {}
+
+	double dist(vec p) const {
+		// TODO
+		return 1;
 	}
 };
 
