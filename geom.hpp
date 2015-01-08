@@ -23,9 +23,9 @@ struct vec {
 	bool is_nil() const {
 		return sqnorm() < EPSILON;
 	}
-    
+
 	double angle() const {
-	    if (is_nil()) return 0;
+		if (is_nil()) return 0;
 		double xx = x / norm();
 		double a = acos(x);
 		return (y >= 0 ? a : -a + 2*M_PI);
@@ -147,36 +147,36 @@ struct circle {
 };
 
 struct circarc {
-    // represents the arc from theta1 to theta2 moving in the direct way on the circle
-    // canonical representation : theta2 > theta1
+	// represents the arc from theta1 to theta2 moving in the direct way on the circle
+	// canonical representation : theta2 > theta1
 	circle c;
 	double theta1, theta2;
 
 	circarc(circle cc, double tha, double thb) : c(cc), theta1(tha), theta2(thb) {
-	    while (theta1 < 0) theta1 += 2*M_PI;
-	    while (theta1 > 2*M_PI) theta1 -= 2*M_PI;
-	    while (theta2 < theta1) theta2 += 2*M_PI;
-	    while (theta2 > theta1 + 2*M_PI) theta2 -= 2*M_PI;
+		while (theta1 < 0) theta1 += 2*M_PI;
+		while (theta1 > 2*M_PI) theta1 -= 2*M_PI;
+		while (theta2 < theta1) theta2 += 2*M_PI;
+		while (theta2 > theta1 + 2*M_PI) theta2 -= 2*M_PI;
 	}
 
-    bool is_in_pie(vec p) const{
-	double theta = (p - c.c).angle();
-	if (theta > theta1 && theta2 > theta) return true ;
-	if (theta + 2*M_PI > theta1 && theta2 > theta + 2*M_PI) return true ;
-	return false ;
-    }
+	bool is_in_pie(vec p) const{
+		double theta = (p - c.c).angle();
+		if (theta > theta1 && theta2 > theta) return true ;
+		if (theta + 2*M_PI > theta1 && theta2 > theta + 2*M_PI) return true ;
+		return false ;
+	}
 	double dist(vec p) const {
-	    if (is_in_pie(p)) return abs((p-c.c).norm()-c.r);
-	    return std::min((p - c.at_angle(theta1)).norm(), (p - c.at_angle(theta2)).norm());
+		if (is_in_pie(p)) return abs((p-c.c).norm()-c.r);
+		return std::min((p - c.at_angle(theta1)).norm(), (p - c.at_angle(theta2)).norm());
 	}
 };
 
 struct angular_sector {
-    // attention, les circarc doivent avoir le même centre
-    circarc inner, outer;
-    
-    angular_sector(circarc i, circarc o) : inner(i), outer(o) {
-	assert(i.c.c == o.c.c);
-    }
+	// attention, les circarc doivent avoir le même centre
+	circarc inner, outer;
+
+	angular_sector(circarc i, circarc o) : inner(i), outer(o) {
+		assert(i.c.c == o.c.c);
+	}
 };
 /* vim: set ts=4 sw=4 tw=0 noet :*/
