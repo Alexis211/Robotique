@@ -11,6 +11,10 @@ struct vec {
 		return sqrt(x*x + y*y);
 	}
 
+	double sqnorm() const {
+		return x*x + y*y;
+	}
+
 	double angle() const {
 		double xx = x / norm();
 		double a = acos(x);
@@ -81,11 +85,14 @@ struct line {
 		// calculate distance from p to the line
 	    return abs(a*p.x+b*p.y+c)/sqrt(a*a+b*b);
 	}
+    vec dir() const {
+	// calculate a directional vector oh the line
+	return vec(-b,a);
+    }
 
 	vec proj(vec p) const {
 		// calculate orthogonal projection of point p on the line
-		// TODO
-		return vec(0, 0);
+	    return p-(a*p.x+b*p.y+c)/(a*a+b*b)*vec(a,b);
 	}
 
 	double angle() const {
@@ -101,12 +108,17 @@ struct segment {
 
 	bool on_segment(vec p) const {
 		// TODO
+	    
 		// does point intersect segment?
 		return false;
 	}
 
 	double dist(vec p) const {
-		
+	    double scal = vec::dot(b-a, p-a);
+	    double sqn = (b-a).sqnorm
+	    if(scal > sqn)return (p-b).norm ;
+	    if(scal < 0) return (p-a).norm ;
+	    return line(a,b).dist(p);
 		return 1;
 	}
 };
