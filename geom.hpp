@@ -1,6 +1,8 @@
 #pragma once
 
 #include <math.h>
+#include <algorithm>
+#include <assert.h>
 
 #define EPSILON 1e-6
 #define abs(x) ((x)<0?-(x):(x))
@@ -13,23 +15,25 @@ struct vec {
 	double norm() const {
 		return sqrt(x*x + y*y);
 	}
+
 	double sqnorm() const {
 		return x*x + y*y;
 	}
 
+	bool is_nil() const {
+		return sqnorm() < EPSILON;
+	}
+    
 	double angle() const {
+	    if (is_nil()) return 0;
 		double xx = x / norm();
 		double a = acos(x);
-		return (y > 0 ? a : -a);
+		return (y >= 0 ? a : -a + 2*M_PI);
 	}
 
 	vec normalize() const {
 		double n = norm();
 		return vec(x / n, y / n);
-	}
-
-	bool is_nil() const {
-		return sqnorm() < EPSILON;
 	}
 
 	static vec from_polar(double r, double theta) {
@@ -47,10 +51,10 @@ struct vec {
 		float cos = dot(a.normalize(), b.normalize());
 		if (cos <= -1) return M_PI;
 		float uangle = acos(cos);
-		if (cross(a, b) > 0) {
+		if (cross(a, b) >= 0) {
 			return uangle;
 		} else {
-			return -uangle;
+			return -uangle + 2*M_PI;
 		}
 	}
 };
@@ -61,6 +65,7 @@ inline vec operator-(const vec& a) { return vec(-a.x, -a.y); }
 inline vec operator*(double a, const vec& v) { return vec(a*v.x, a*v.y); }
 inline vec operator*(const vec& v, double a) { return vec(a*v.x, a*v.y); }
 inline vec operator/(const vec& v, double a) { return vec(v.x/a, v.y/a); }
+inline bool operator==(const vec& v, const vec& w) { return (v-w).is_nil(); }
 
 struct line {
 	// Line defined by ax + by + c = 0
@@ -135,30 +140,43 @@ struct circle {
 		if (d > r) return (d - r);
 		return 0;
 	}
-};
 
-struct circpoint {
-	circle c;
-	double theta;
-
-	circpoint(circle cc, double th) : c(cc), theta(th) {}
-	circpoint(vec cc, double rr, double th) : c(cc, rr), theta(th) {}
-
-	vec pos() const {
-		return c.c + vec(c.r * cos(theta), c.r * sin(theta));
+	vec at_angle(double theta) const {
+		return c + vec(r * cos(theta), r * sin(theta));
 	}
 };
 
 struct circarc {
+    // represents the arc from theta1 to theta2 moving in the direct way on the circle
+    // canonical representation : theta2 > theta1
 	circle c;
 	double theta1, theta2;
 
-	circarc(circle cc, double tha, double thb) : c(cc), theta1(tha), theta2(thb) {}
+	circarc(circle cc, double tha, double thb) : c(cc), theta1(tha), theta2(thb) {
+	    while (theta1 < 0) theta1 += 2*M_PI;
+	    while (theta1 > 2*M_PI) theta1 -= 2*M_PI;
+	    while (theta2 < theta1) theta2 += 2*M_PI;
+	    while (theta2 > theta1 + 2*M_PI) theta2 -= 2*M_PI;
+	}
 
+    bool is_in_pie(vec p) const{
+	double theta = (p - c.c).angle();
+	if (theta > theta1 && theta2 > theta) return true ;
+	if (theta + 2*M_PI > theta1 && theta2 > theta + 2*M_PI) return true ;
+	return false ;
+    }
 	double dist(vec p) const {
-		// TODO
-		return 1;
+	    if (is_in_pie(p)) return abs((p-c.c).norm()-c.r);
+	    return std::min((p - c.at_angle(theta1)).norm(), (p - c.at_angle(theta2)).norm());
 	}
 };
 
+struct angular_sector {
+    // attention, les circarc doivent avoir le même centre
+    circarc inner, outer;
+    
+    angular_sector(circarc i, circarc o) : inner(i), outer(o) {
+	assert(i.c.c == o.c.c);
+    }
+};
 /* vim: set ts=4 sw=4 tw=0 noet :*/
