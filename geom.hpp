@@ -27,10 +27,15 @@ struct line {
 	double a, b, c;
 
 	line(double aa, double bb, double cc) : a(aa), b(bb), c(cc) {}
-
+    line(vec p1, vec p2) {
+	a = p1.x-p2.x ;
+	b = p1.y-p2.y ;
+	c = p1.x*(p2.x-p1.x)+p1.y*(p2.y-p1.y);
+	   
+	   }
+    
 	double dist(vec p) const {
-		// TODo
-		return 1;
+	    return abs(a*p.x+b*p.y+c)/sqrt(a*a+b*b);
 	}
 
 	double angle() const {
@@ -45,7 +50,7 @@ struct segment {
 	segment(vec pa, vec pb) : a(pa), b(pb), {}
 
 	double dist(vec p) const {
-		// TODO
+		
 		return 1;
 	}
 };
