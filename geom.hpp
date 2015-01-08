@@ -43,10 +43,10 @@ struct vec {
 	static double dot(vec a, vec b) {		// dot product (produit scalaire)
 		return a.x * b.x + a.y * b.y;
 	}
-	static double cross(vec a, vec b) {	// cross product (déterminant 2x2)
+	static double cross(vec a, vec b) {		// cross product (déterminant 2x2)
 		return a.x * b.y - a.y * b.x;
 	}
-	static double angle(vec a, vec b) {	// oriented angle between two vectors
+	static double angle(vec a, vec b) {		// oriented angle between two vectors
 		if (a.is_nil() || b.is_nil()) return 0;
 		float cos = dot(a.normalize(), b.normalize());
 		if (cos <= -1) return M_PI;
@@ -87,8 +87,8 @@ struct line {
 		return abs(a*p.x + b*p.y + c) / sqrt(a*a + b*b);
 	}
 	vec dir() const {
-	// calculate a directional vector oh the line
-	return vec(-b,a);
+		// calculate a directional vector oh the line
+		return vec(-b,a);
 	}
 
 	vec proj(vec p) const {
@@ -109,7 +109,7 @@ struct segment {
 
 	bool on_segment(vec p) const {
 		// TODO
-		
+
 		// does point intersect segment?
 		return false;
 	}
@@ -136,7 +136,7 @@ struct circle {
 
 	double dist(vec p) const {
 		// distance à un cercle
-	    double d = (c-p).norm() ;
+		double d = (c-p).norm() ;
 		if (d > r) return (d - r);
 		return 0;
 	}
