@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "geom.hpp"
+#include "problem.hpp"
 
 int main() {
 	printf("%.10f\n", M_PI);

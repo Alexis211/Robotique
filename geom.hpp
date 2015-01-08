@@ -17,8 +17,48 @@ struct vec {
 		return (y > 0 ? a : -a);
 	}
 
+	vec normalize() const {
+		double n = norm();
+		return vec(x / n, y / n);
+	}
+
+	bool is_nil() const {
+		return x == 0 && y == 0;
+	}
+
 	vec operator+ (const vec& o) const {
 		return vec(x + o.x, y + o.y);
+	}
+	vec operator- (const vec& o) const {
+		return vec(x - o.x, y - o.y);
+	}
+	vec operator* (double m) const {
+		return vec(m * x, m * y);
+	}
+	vec operator/ (double m) const {
+		return vec(m / x, m / y);
+	}
+
+	static vec from_polar(double r, double theta) {
+		return vec(r * cos(theta), r * sin(theta));
+	}
+
+	static vec dot(vec a, vec b) {		// dot product (produit scalaire)
+		return a.x * b.x + a.y * b.y;
+	}
+	static vec cross(vec a, vec b) {	// cross product (déterminant 2x2)
+		return a.x * b.y - a.y * b.x;
+	}
+	static vec angle(vec a, vec b) {	// oriented angle between two vectors
+		if (a.is_nil() || b.is_nil()) return 0;
+		float cos = dot(a.normalize(), b.normalize());
+		if (cos <= -1) return M_PI;
+		float uangle = acos(cos);
+		if (cross(a, b) > 0) {
+			return uangle;
+		} else {
+			return -uangle;
+		}
 	}
 };
 
@@ -28,9 +68,20 @@ struct line {
 
 	line(double aa, double bb, double cc) : a(aa), b(bb), c(cc) {}
 
+	bool on_line(vec p) const {
+		return a * p.x + b * p.y + c == 0;
+	}
+
 	double dist(vec p) const {
-		// TODo
+		// calculate distance from p to the line
+		// TODO
 		return 1;
+	}
+
+	vec proj(vec p) const {
+		// calculate orthogonal projection of point p on the line
+		// TODO
+		return vec(0, 0);
 	}
 
 	double angle() const {
@@ -42,7 +93,13 @@ struct line {
 struct segment {
 	vec a, b;
 
-	segment(vec pa, vec pb) : a(pa), b(pb), {}
+	segment(vec pa, vec pb) : a(pa), b(pb) {}
+
+	bool on_segment(vec p) const {
+		// TODO
+		// does point intersect segment?
+		return false;
+	}
 
 	double dist(vec p) const {
 		// TODO
@@ -56,6 +113,15 @@ struct circle {
 
 	circle(double x, double y, double rr) : c(x, y), r(rr) {}
 	circle(vec cc, double rr) : c(cc), r(rr) {}
+
+	bool on_circle(vec.p) const {
+		return ((p - c).norm() == r);
+	}
+
+	double dist(vec p) const {
+		// TODO
+		return 1;
+	}
 };
 
 struct circpoint {
@@ -63,6 +129,7 @@ struct circpoint {
 	double theta;
 
 	circpoint(circle cc, double th) : c(cc), theta(th) {}
+	circpoint(vec cc, double rr, double th : c(cc, rr), theta(th) {}
 
 	vec pos() const {
 		return c.c + vec(c.r * cos(theta), c.r * sin(theta));

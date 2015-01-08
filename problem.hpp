@@ -16,9 +16,14 @@ struct hilare_a {	// System A
 	// position actuelle
 	double x, y, theta, phi;
 
+	vec pos() const { return vec(x, y); }
+	vec dir() const { return vec::from_polar(1, theta); }
+
 	vec pos_trolley() const {
-		//TODO
-		return vec(0, 0);
+		return pos() + vec::from_polar(l, theta + phi + M_PI);
+	}
+	vec dir_trolley() const {
+		return vec::from_polar(1, theta + phi);
 	}
 };
 

@@ -1,4 +1,4 @@
 BIN=pathfind
 
 $(BIN): *.cpp *.hpp
-	g++ -o $@ *.cpp -lm
+	g++ -o $@ *.cpp -lm -O2
