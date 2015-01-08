@@ -17,10 +17,6 @@ struct vec {
 		return x*x + y*y;
 	}
 
-	double sqnorm() const {
-		return x*x + y*y;
-	}
-
 	double angle() const {
 		double xx = x / norm();
 		double a = acos(x);
@@ -115,9 +111,9 @@ struct segment {
 
 	double dist(vec p) const {
 		double scal = vec::dot(b-a, p-a);
-		double sqn = (b-a).sqnorm
-		if(scal > sqn)return (p-b).norm ;
-		if(scal < 0) return (p-a).norm ;
+		double sqn = (b-a).sqnorm();
+		if (scal > sqn) return (p-b).norm();
+		if (scal < 0) return (p-a).norm();
 		return line(a,b).dist(p);
 	}
 };
@@ -134,8 +130,10 @@ struct circle {
 	}
 
 	double dist(vec p) const {
-		// TODO
-		return 1;
+		// distance à un cercle
+	    double d = (c-p).norm() ;
+		if (d > r) return (d - r);
+		return 0;
 	}
 };
 
