@@ -2,6 +2,9 @@
 
 #include <math.h>
 
+#define EPSILON 1e-6
+#define abs(x) ((x)<0?-(x):(x))
+
 struct vec {
 	double x, y;
 
@@ -9,6 +12,9 @@ struct vec {
 
 	double norm() const {
 		return sqrt(x*x + y*y);
+	}
+	double sqnorm() const {
+		return x*x + y*y;
 	}
 
 	double angle() const {
@@ -23,33 +29,20 @@ struct vec {
 	}
 
 	bool is_nil() const {
-		return x == 0 && y == 0;
-	}
-
-	vec operator+ (const vec& o) const {
-		return vec(x + o.x, y + o.y);
-	}
-	vec operator- (const vec& o) const {
-		return vec(x - o.x, y - o.y);
-	}
-	vec operator* (double m) const {
-		return vec(m * x, m * y);
-	}
-	vec operator/ (double m) const {
-		return vec(m / x, m / y);
+		return sqnorm() < EPSILON;
 	}
 
 	static vec from_polar(double r, double theta) {
 		return vec(r * cos(theta), r * sin(theta));
 	}
 
-	static vec dot(vec a, vec b) {		// dot product (produit scalaire)
+	static double dot(vec a, vec b) {		// dot product (produit scalaire)
 		return a.x * b.x + a.y * b.y;
 	}
-	static vec cross(vec a, vec b) {	// cross product (déterminant 2x2)
+	static double cross(vec a, vec b) {	// cross product (déterminant 2x2)
 		return a.x * b.y - a.y * b.x;
 	}
-	static vec angle(vec a, vec b) {	// oriented angle between two vectors
+	static double angle(vec a, vec b) {	// oriented angle between two vectors
 		if (a.is_nil() || b.is_nil()) return 0;
 		float cos = dot(a.normalize(), b.normalize());
 		if (cos <= -1) return M_PI;
@@ -61,6 +54,13 @@ struct vec {
 		}
 	}
 };
+
+inline vec operator+(const vec& a, const vec& b) { return vec(a.x+b.x, a.y+b.y); }
+inline vec operator-(const vec& a, const vec& b) { return vec(a.x-b.x, a.y-b.y); }
+inline vec operator-(const vec& a) { return vec(-a.x, -a.y); }
+inline vec operator*(double a, const vec& v) { return vec(a*v.x, a*v.y); }
+inline vec operator*(const vec& v, double a) { return vec(a*v.x, a*v.y); }
+inline vec operator/(const vec& v, double a) { return vec(v.x/a, v.y/a); }
 
 struct line {
 	// Line defined by ax + by + c = 0
@@ -74,12 +74,12 @@ struct line {
 	}
 
 	bool on_line(vec p) const {
-		return a * p.x + b * p.y + c == 0;
+		return a * p.x + b * p.y + c < EPSILON;
 	}
 
 	double dist(vec p) const {
 		// calculate distance from p to the line
-	    return abs(a*p.x+b*p.y+c)/sqrt(a*a+b*b);
+	    return abs(a*p.x + b*p.y + c) / sqrt(a*a + b*b);
 	}
 
 	vec proj(vec p) const {
@@ -106,7 +106,7 @@ struct segment {
 	}
 
 	double dist(vec p) const {
-		
+		//TODO
 		return 1;
 	}
 };
@@ -118,8 +118,8 @@ struct circle {
 	circle(double x, double y, double rr) : c(x, y), r(rr) {}
 	circle(vec cc, double rr) : c(cc), r(rr) {}
 
-	bool on_circle(vec.p) const {
-		return ((p - c).norm() == r);
+	bool on_circle(vec p) const {
+		return ((p - c).norm() - r < EPSILON);
 	}
 
 	double dist(vec p) const {
@@ -133,7 +133,7 @@ struct circpoint {
 	double theta;
 
 	circpoint(circle cc, double th) : c(cc), theta(th) {}
-	circpoint(vec cc, double rr, double th : c(cc, rr), theta(th) {}
+	circpoint(vec cc, double rr, double th) : c(cc, rr), theta(th) {}
 
 	vec pos() const {
 		return c.c + vec(c.r * cos(theta), c.r * sin(theta));
