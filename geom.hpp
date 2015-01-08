@@ -29,7 +29,7 @@ struct line {
 	line(double aa, double bb, double cc) : a(aa), b(bb), c(cc) {}
 
 	double dist(vec p) const {
-		// TODO
+		// TODo
 		return 1;
 	}
 
