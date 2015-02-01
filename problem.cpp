@@ -92,6 +92,7 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 
 	// calcul des centres des courbes canoniques
 	vec cca = pos_a.canon_curve_center();
+	
 	double rca = (cca - pos_a.pos_trolley()).norm();
 	vec ccb = pos_b.canon_curve_center();
 	double rcb = (ccb - pos_b.pos_trolley()).norm();
@@ -104,47 +105,43 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 		int ea = eps[i_eps][0];
 		int eb = eps[i_eps][1];
 
-		double a = ((ea * rca - 1) * ccb.y - cca.y * (eb * rcb - 1)) / delta;
-		double b = (cca.x * (eb * rcb - 1) - ccb.x * (ea * rca - 1)) / delta;
+		double xc = cca.x, yc = cca.y, xcp = ccb.x, ycp = ccb.y;
 
-		line l(a, b, 1);
+		double a0 = (ea * rca - eb * rcb) / (xc - xcp);
+		double b0 = 0;
+		double c0 = (ea * rca - xc * a0);
 
-		vec uv = vec(a, b).normalize();
+		double delta = xc * ycp - xcp * yc;
+		double a = (yc - ycp) / delta;
+		double b = (xcp - xc) / delta;
+		double c = 1;
 
-		vec pa(0,0);
-		if (l.on_line(cca + rca * uv)) {
-			pa = cca + rca * uv;
-		} else if (l.on_line(cca - rca * uv)) {
-			pa = cca - rca * uv;
-		} else {
-			assert(false);	// calculs de merde
-		}
+		double di = a * a0 * a * a0 - (a0 * a0 - 1) * (a * a + b * b);
+		if (di < 0) continue;
 
-		vec pb(0,0);
-		if (l.on_line(ccb + rcb * uv)) {
-			pb = ccb + rcb * uv;
-		} else if (l.on_line(ccb - rcb * uv)) {
-			pb = ccb - rcb * uv;
-		} else {
-			assert(false);
-		}
+		double lambda = (-a * a0 + sqrt(di)) / (a * a + b * b);
 
-		double domega1 = (pa - cca).angle() - (pos_a.pos_trolley() - cca).angle();
-		double domega2 = (pos_b.pos_trolley() - ccb).angle() - (pb - ccb).angle();
-		double xx = pos_a.theta + domega1 + domega2 - pos_b.theta;
+		line l(a0 + lambda * a, b0 + lambda * b, c0 + lambda * c);
 
+		vec v = l.proj(cca);
+		vec w = l.proj(ccb);
+
+		double domega1 = (v - cca).angle() - (pos_a.pos_trolley() - cca).angle();
+		double dtheta1 = pos_a.phi;
+		double dtheta2 = -pos_b.phi;
+		double domega2 = (pos_b.pos_trolley() - ccb).angle() - (w - ccb).angle();
+		double xx = pos_a.theta + domega1 + dtheta1 + dtheta2 + domega2 - pos_b.theta;
 		cout << "domega1: " << domega1
 			<< ", domega2: " << domega2
 			<< ", xx:" << xx << endl;
-
 		if (fabs(xx) < 0.01 || fabs(xx - 2*M_PI) < 0.01 && fabs(xx + 2*M_PI) < 0.01) {
 			vector<hilare_a_mvt> sol;
-			
+
 			hilare_a_mvt r1;
 			r1.is_arc = true;
 			r1.from = pos_a;
 			r1.to = pos_a;
-			r1.to.x = pa.x; r1.to.y = pa.y;
+			r1.to.x = v.x; r1.to.y = v.y;
 			r1.to.theta = r1.from.theta + domega1;
 			r1.center = cca;
 			r1.domega = domega1;
@@ -154,9 +151,9 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 			hilare_a_mvt t;
 			t.from = r1.to;
 			t.to = t.from;
-			t.to.x = pb.x; t.to.y = pb.y;
+			t.to.x = w.x; t.to.y = w.y; t.to.phi = 0;
 			t.is_arc = false;
-			t.ds = (pb - pa).norm();
+			t.ds = (w - v).norm();
 			t.dtheta_before = t.from.phi;
 			sol.push_back(t);
 
@@ -217,7 +214,10 @@ void solver::run() {
 		_d = d;
 	}
 
-	while (!_please_stop) {
+	int i = 0;
+	while (!_please_stop && (i++) < 300) {
+		sf::sleep(sf::milliseconds(100));
+
 		solution s = d.try_find_solution();
 		if (s.movement.size() > 0) {
 			_s = s;
@@ -324,7 +324,7 @@ void solver_internal::step(const problem &p) {
 	cout << "Solver step..." << endl;
 
 	// take new random point
-	double min_x = -100, min_y = -100;
+	double min_x = -800, min_y = -800;
 	double max_x = 800, max_y = 800;
 	for (auto& o: p.obstacles) {
 		if (o.c.c.x < min_x) min_x = o.c.c.x;
@@ -343,6 +343,10 @@ void solver_internal::step(const problem &p) {
 		solution s = solution::direct_sol(pts[i], rp);
 		if (s.movement.size() > 0 && !s.intersects(p)) {
 			paths[i][pts.size()] = s;
+		}
+		solution ss = solution::direct_sol(rp, pts[i]);
+		if (ss.movement.size() > 0 && !ss.intersects(p)) {
+			paths[pts.size()][i] = ss;
 		}
 	}
 	pts.push_back(rp);

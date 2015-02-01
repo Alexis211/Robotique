@@ -26,28 +26,25 @@ struct hilare_a {	// System A
 	vec pos() const { return vec(x, y); }
 	vec dir() const { return vec::from_polar(1, theta); }
 
-	vec dir_trolley() const {
-		return vec::from_polar(1, theta + phi + M_PI);
-	}
 	vec pos_trolley() const {
-		return pos() + param->l * dir_trolley();
+		return pos() - vec::from_polar(param->l, theta + phi);
 	}
 
 	vec canon_curve_center() const {
-		double delta = cos(theta) * sin(theta + phi) - sin(theta) * cos(theta + phi);
-		assert(delta != 0);
-
 		vec a = pos();
 		vec b = pos_trolley();
-		vec eth = vec::from_polar(1, theta);
-		vec ethph = vec::from_polar(1, theta + phi);
-		double xc = (vec::dot(a, eth) * sin(theta + phi) - vec::dot(b, ethph) * sin(theta)) / delta;
-		double yc = (cos(theta) * vec::dot(b, ethph) - cos(theta + phi) * vec::dot(a, eth));
-		return vec(xc, yc);
+
+		double u = b.x - a.x;
+		double v = b.y - a.y;
+		
+		double dd = sin(theta) * (a.x - b.x) + cos(theta) * (b.y - a.y);
+		assert(dd != 0);
+		double lambda = (u * u + v * v) / dd;
+
+		return a + lambda * vec(- sin(theta), cos(theta));
 	}
 
-    	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
-
+	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
 };
 
 struct problem {

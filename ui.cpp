@@ -213,6 +213,12 @@ void UI::render_pos(const hilare_a &pos, sf::Color c) {
 	_win.draw(l);
 
 	render_circle(circle(pos.pos_trolley(), pos.param->r_c_trolley), c, sf::Color::Transparent, 2);
+
+	if (fabs(pos.phi) > 0.01) {
+		vec cc = pos.canon_curve_center();
+		//render_circle(circle(cc, (pos.pos() - cc).norm()), c, sf::Color::Transparent, 2);
+		//render_circle(circle(cc, (pos.pos_trolley() - cc).norm()), c, sf::Color::Transparent, 2);
+	}
 }
 
 void UI::render_obstacle(const obstacle &o) {
@@ -221,25 +227,27 @@ void UI::render_obstacle(const obstacle &o) {
 
 void UI::render_mvt(const hilare_a_mvt &m, sf::Color c) {
 	if (m.is_arc) {
-		sf::Vertex l[20];
+		const int nd = 42;
+
+		sf::Vertex l[nd];
 
 		l[0] = sf::Vertex(to_view(m.from.pos()), c);
 
 		double th = (m.from.pos() - m.center).angle();
 		double r = (m.from.pos() - m.center).norm();
-		for (int i = 1; i < 19; i++) {
-			l[i] = sf::Vertex(to_view(m.center + vec::from_polar(r, th + m.domega * i / 20)), c);
+		for (int i = 1; i < nd - 1; i++) {
+			l[i] = sf::Vertex(to_view(m.center + vec::from_polar(r, th + m.domega * i / nd)), c);
 		}
 
-		l[19] = sf::Vertex(to_view(m.to.pos()), c);
+		l[nd - 1] = sf::Vertex(to_view(m.to.pos()), c);
 
-		_win.draw(l, 20, sf::Lines);
+		_win.draw(l, nd, sf::LinesStrip);
 	} else {
 		sf::Vertex l[] = {
 			sf::Vertex(to_view(m.from.pos()), c),
 			sf::Vertex(to_view(m.to.pos()), c),
 		};
-		_win.draw(l, 2, sf::Lines);
+		_win.draw(l, 2, sf::LinesStrip);
 	}
 }
 
