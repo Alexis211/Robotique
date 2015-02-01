@@ -142,7 +142,7 @@ vector<solution> solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos
 			<< ", domega2: " << domega2
 			<< ", xx:" << xx << endl;
 
-		if (fabs(xx) < 0.01 || fabs(xx - 2*M_PI) < 0.01 && fabs(xx + 2*M_PI) < 0.01) {
+		if (fabs(xx) < 0.01 || fabs(xx - 2*M_PI) < 0.01 || fabs(xx + 2*M_PI) < 0.01) {
 			vector<hilare_a_mvt> sol;
 
 			vec p1 = cca + vec::from_polar((pos_a.pos() - cca).norm(), (pos_a.pos() - cca).angle() + domega1);
@@ -185,7 +185,7 @@ vector<solution> solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos
 }
 
 std::vector<solution> solution::direct_sol_r(const hilare_a &pos_a, const hilare_a &pos_b) {
-	std::vector<solution> ret = direect_sol(pos_a, pos_b);
+	std::vector<solution> ret = direct_sol(pos_a, pos_b);
 
 	const int nnn = 8;
 	const double xa[nnn] = { -1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1 };
@@ -242,7 +242,7 @@ bool solution::intersects(const problem &p) const {
 }
 
 double solution::length() {
-	double x;
+	double x = 0;
 	for (auto& m: movement) {
 		x += m.length();
 	}
@@ -416,7 +416,7 @@ void solver_internal::step(const problem &p) {
 void solver_internal::find_direct_path(int a, int b, const problem &p) {
 	vector<solution> s = solution::direct_sol_r(pts[a], pts[b]);
 	int best = -1;
-	for (int k = 0; k < s.size(); k++) {
+	for (unsigned k = 0; k < s.size(); k++) {
 		if (s[k].movement.size() > 0 && !s[k].intersects(p)) {
 			if (best == -1 || s[k].length() < s[best].length()) best = k;
 		}
