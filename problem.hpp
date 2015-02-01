@@ -7,6 +7,7 @@
 
 struct obstacle {
 	circle c;
+	obstacle(circle cc) : c(cc) {}
 };
 
 struct hilare_a_param {
@@ -51,6 +52,7 @@ struct hilare_a_mvt {
 	// deux étapes dans le mouvement :
 	// - bien orienter la voiture (c'est l'angle dtheta_before)
 	// - avancer/reculer sur le cercle (c'est l'angle domega)
+	hilare_a_mvt() : center(0, 0) {}
 
 	hilare_a from, to;
 
@@ -88,14 +90,14 @@ struct solver_internal {
 	// intermediate data for the solver
 	// represents a graph of randomly chosen positions and simple solutions between them
 	std::vector<hilare_a> pts;
-	std::map<int, std::map<int, hilare_a_mvt> > paths;
+	std::map<int, std::map<int, solution> > paths;
 };
 
 class solver {
 	// mutex-protected asynchronous structure
 
 	private:
-	//todo
+	solver_internal _d;
 
 	public:
 	solver();
@@ -103,6 +105,8 @@ class solver {
 	void start(const problem &p);
 	bool finished();
 	solution get_solution();
+
+	solver_internal peek_internal();
 };
 
 

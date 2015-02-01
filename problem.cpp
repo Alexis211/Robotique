@@ -56,14 +56,29 @@ bool hilare_a_mvt::intersects(const problem &p) const {
 // ================================= //
 
 solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
+	vector<hilare_a_mvt> sol;
+
 	// TODO: try different possibilities and chose the shortest one
-	return solution(vector<hilare_a_mvt>());
+	hilare_a_mvt mvt;
+	mvt.from = pos_a;
+	mvt.to = pos_b;
+	mvt.is_arc = false;
+	// la suite à compléter
+	sol.push_back(mvt);
+
+	return solution(sol);
 }
 
 // =============================== //
 // IMPLEMENTATION FOR CLASS SOLVER //
 // =============================== //
 
-// TODO
+solver::solver() {
+	// nothing ?
+}
+
+solver_internal solver::peek_internal() {
+	return _d;
+}
 
 /* vim: set ts=4 sw=4 tw=0 noet :*/

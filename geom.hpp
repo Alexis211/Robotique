@@ -27,7 +27,7 @@ struct vec {
 	double angle() const {
 		if (is_nil()) return 0;
 		double xx = x / norm();
-		double a = acos(x);
+		double a = acos(xx);
 		return (y >= 0 ? a : -a + 2*M_PI);
 	}
 
@@ -143,6 +143,10 @@ struct circle {
 
 	vec at_angle(double theta) const {
 		return c + vec(r * cos(theta), r * sin(theta));
+	}
+
+	bool intersects(vec p) const {
+		return (c - p).norm() <= r;
 	}
 };
 
