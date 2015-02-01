@@ -11,6 +11,7 @@
 		- e : select end pos
 		- a : add obstacle
 		- d : delete obstacle under mouse pointer
+		- g : start solving
 	Select modes : no other keys
 */
 
@@ -25,6 +26,8 @@ UI::UI(hilare_a_param *p) : _sel_obs(vec(0,0), 0) {
 	_view.zoom = 1;
 
 	_mode = M_NORMAL;
+
+	_got_sol = true;
 }
 
 void UI::run() {
@@ -55,12 +58,20 @@ void UI::run() {
 					_view.zoom *= 1.1;
 				} else if (k == 'o') {
 					_view.zoom /= 1.1;
+				} else if (k == 'g') {
+					_solver.start(_p);
+					_got_sol = false;
 				}
 			}
 
 			if (_mode == M_NORMAL) handle_normal(ev);
 			if (_mode == M_INS_OBSTACLE) handle_ins_obs(ev);
 			if (_mode == M_SEL_BEGIN || _mode == M_SEL_END) handle_sel_pos(ev);
+		}
+
+		if (!_got_sol && _solver.finished()) {
+			_s = _solver.get_solution();
+			_got_sol = true;
 		}
 
 		_win.clear(sf::Color::Black);

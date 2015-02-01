@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <map>
+#include <SFML/System.hpp>
 
 #include "geom.hpp"
 
@@ -87,18 +88,35 @@ struct solver_internal {
 	// represents a graph of randomly chosen positions and simple solutions between them
 	std::vector<hilare_a> pts;
 	std::map<int, std::map<int, solution> > paths;
+
+	void initialize(const problem &p);
+	solution try_find_solution();
+	void step(const problem &p);
 };
 
 class solver {
 	// mutex-protected asynchronous structure
 
 	private:
+
+	sf::Mutex _d_lock;
 	solver_internal _d;
+	problem _p;
+
+	bool _please_stop;
+	bool _running;
+	bool _done;
+	solution _s;
+	
+	sf::Thread _worker;
 
 	public:
 	solver();
 
 	void start(const problem &p);
+
+	void run();	// worker thread
+
 	bool finished();
 	solution get_solution();
 

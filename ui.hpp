@@ -28,6 +28,7 @@ class UI {
 	problem _p;
 	solution _s;
 	solver _solver;
+	bool _got_sol;
 
 	struct {
 		double x0, y0, zoom;
