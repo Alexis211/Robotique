@@ -13,6 +13,12 @@ inline double frand(double a, double b) {
 	return r * (b - a) + a;
 }
 
+inline double canon_angle(double ref, double move_it){
+    while (ref>move_it) move_it += 2*M_PI;
+    while (move_it >= ref + 2*M_PI) move_it -= 2*M_PI;
+    return move_it ;
+}
+
 struct vec {
 	double x, y;
 
