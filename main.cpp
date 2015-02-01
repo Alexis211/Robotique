@@ -1,10 +1,17 @@
 #include <stdio.h>
 
-#include "geom.hpp"
-#include "problem.hpp"
+#include "ui.hpp"
 
 int main() {
-	printf("%.10f\n", M_PI);
+	hilare_a_param p;
+	p.l = 30;
+	p.r_c_car = 15;
+	p.r_c_trolley = 12;
+
+	UI the_ui(&p);
+
+	the_ui.run();
+
 	return 0;
 }
 

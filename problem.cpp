@@ -17,7 +17,7 @@ bool hilare_a_mvt::intersects(const obstacle &o) const {
 }
 
 bool hilare_a_mvt::intersects(const problem &p) const {
-	for (auto i = p.map.begin(); i != p.map.end(); i++) {
+	for (auto i = p.obstacles.begin(); i != p.obstacles.end(); i++) {
 		if (intersects(*i)) return true;
 	}
 	return false;
@@ -31,5 +31,11 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 	// TODO: try different possibilities and chose the shortest one
 	return solution(vector<hilare_a_mvt>());
 }
+
+// =============================== //
+// IMPLEMENTATION FOR CLASS SOLVER //
+// =============================== //
+
+// TODO
 
 /* vim: set ts=4 sw=4 tw=0 noet :*/
