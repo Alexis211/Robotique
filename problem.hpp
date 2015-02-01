@@ -92,6 +92,8 @@ struct solution {
 
 	// simple direct solution from A to B, takes into account no obstacles
 	static std::vector<solution> direct_sol(const hilare_a &pos_a, const hilare_a &pos_b);
+	// same but try to rotate a bit before and after
+	static std::vector<solution> direct_sol_r(const hilare_a &pos_a, const hilare_a &pos_b);
 
 	// check if a solution intersects an obstacle of problem
 	bool intersects(const problem &p) const;
