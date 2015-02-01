@@ -8,6 +8,7 @@ using namespace std;
 
 double hilare_a_mvt::length() {
 	// returns length traveled by the car
+	// TODO : two cases
 	return domega * (center - from.pos()).norm();
 }
 
@@ -28,8 +29,17 @@ bool hilare_a_mvt::intersects(const problem &p) const {
 // ================================= //
 
 solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
+	vector<hilare_a_mvt> sol;
+
 	// TODO: try different possibilities and chose the shortest one
-	return solution(vector<hilare_a_mvt>());
+	hilare_a_mvt mvt;
+	mvt.from = pos_a;
+	mvt.to = pos_b;
+	mvt.is_arc = false;
+	// la suite à compléter
+	sol.push_back(mvt);
+
+	return solution(sol);
 }
 
 // =============================== //
