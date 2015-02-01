@@ -12,60 +12,60 @@ using namespace std;
 
 double hilare_a_mvt::length() {
 	// returns length traveled by the car
-    if (is_arc)	return domega * (center - from.pos()).norm();
-    return ds ;
+	if (is_arc)	return domega * (center - from.pos()).norm();
+	return ds ;
 }
 
 bool hilare_a::intersects(const obstacle &o) const {
-    
-    if((pos()-o.c.c).norm() < o.c.r + param->r_c_car)return true ;
-    if((pos_trolley()-o.c.c).norm() < o.c.r + param->r_c_trolley)return true ;
-    if(segment(pos(),pos_trolley()).dist(o.c.c) < o.c.r)return true ;
-    return false ;
+
+	if((pos()-o.c.c).norm() < o.c.r + param->r_c_car)return true ;
+	if((pos_trolley()-o.c.c).norm() < o.c.r + param->r_c_trolley)return true ;
+	if(segment(pos(),pos_trolley()).dist(o.c.c) < o.c.r)return true ;
+	return false ;
 }
 
 bool hilare_a_mvt::intersects(const obstacle &o) const {
-    hilare_a_param *p = from.param;
-    vec pos_init = from.pos();
-    vec pos_init_trolley = from.pos_trolley();
-    if(is_arc){
-	double r_min =
-	    min((pos_init - center).norm()-(p->r_c_car),
-		(pos_init_trolley - center).norm()-(p->r_c_trolley));
-	double r_max =
-	    max((pos_init - center).norm()+(p->r_c_car),
-		(pos_init_trolley - center).norm()+(p->r_c_trolley));
-	//TODO
-	double theta1;
-	double theta2;
-	if (domega>=0) {
-	    if(from.phi > 0){
-		theta1 = (from.pos()-center).angle();
-		theta2 = (to.pos_trolley()-center).angle();
-	    }
-	    else {
-		theta1 = (from.pos_trolley()-center).angle();
-		theta2 = (to.pos()-center).angle();
+	hilare_a_param *p = from.param;
+	vec pos_init = from.pos();
+	vec pos_init_trolley = from.pos_trolley();
+	if(is_arc){
+		double r_min =
+			min((pos_init - center).norm()-(p->r_c_car),
+					(pos_init_trolley - center).norm()-(p->r_c_trolley));
+		double r_max =
+			max((pos_init - center).norm()+(p->r_c_car),
+					(pos_init_trolley - center).norm()+(p->r_c_trolley));
+		//TODO
+		double theta1;
+		double theta2;
+		if (domega>=0) {
+			if(from.phi > 0){
+				theta1 = (from.pos()-center).angle();
+				theta2 = (to.pos_trolley()-center).angle();
+			}
+			else {
+				theta1 = (from.pos_trolley()-center).angle();
+				theta2 = (to.pos()-center).angle();
+			}
 		}
-	}
-	else {
-	    if(from.phi > 0){ //TODO ??
-		theta2 = (from.pos()-center).angle();
-		theta1 = (to.pos_trolley()-center).angle();
-	    }
-	    else {
-		theta2 = (from.pos_trolley()-center).angle();
-		theta1 = (to.pos()-center).angle();
+		else {
+			if(from.phi > 0){ //TODO ??
+				theta2 = (from.pos()-center).angle();
+				theta1 = (to.pos_trolley()-center).angle();
+			}
+			else {
+				theta2 = (from.pos_trolley()-center).angle();
+				theta1 = (to.pos()-center).angle();
+			}
 		}
+		theta2 = canon_angle(theta1,theta2);
+		angular_sector sector = angular_sector(circarc(circle(center,r_min), theta1, theta2), circarc(circle(center,r_max), theta1, theta2));
+		if (sector.dist(o.c.c)<=o.c.r)return true;
+		if (from.intersects(o)) return true;
+		if (to.intersects(o)) return true;
+		return false;
+
 	}
-	theta2 = canon_angle(theta1,theta2);
-    angular_sector sector = angular_sector(circarc(circle(center,r_min), theta1, theta2), circarc(circle(center,r_max), theta1, theta2));
-    if (sector.dist(o.c.c)<=o.c.r)return true;
-    if (from.intersects(o)) return true;
-    if (to.intersects(o)) return true;
-    return false;
-    
-    }
 	return false;
 }
 
@@ -86,7 +86,7 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 	// - trouver les quatre droites tangentes aux deux cercles canoniques
 	// - pour chacune de ces droites, se mettre dessus, aller droit, s'en séparer
 	//   (vérifier la cohérence : il n'y en a que deux qui sont dans le bon sens !)
-	
+
 	// cas où la position de départ ou d'arrivée n'a pas pour courbe canonique un cercle : se tourner de pi/6 par exemple
 	// (ce cas n'arrivera pas, car on tire complètement au hasard...)
 
@@ -139,7 +139,7 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 
 		if (fabs(xx) < 0.01 || fabs(xx - 2*M_PI) < 0.01 && fabs(xx + 2*M_PI) < 0.01) {
 			vector<hilare_a_mvt> sol;
-			
+
 			hilare_a_mvt r1;
 			r1.is_arc = true;
 			r1.from = pos_a;

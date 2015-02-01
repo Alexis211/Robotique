@@ -14,9 +14,9 @@ inline double frand(double a, double b) {
 }
 
 inline double canon_angle(double ref, double move_it){
-    while (ref>move_it) move_it += 2*M_PI;
-    while (move_it >= ref + 2*M_PI) move_it -= 2*M_PI;
-    return move_it ;
+	while (ref>move_it) move_it += 2*M_PI;
+	while (move_it >= ref + 2*M_PI) move_it -= 2*M_PI;
+	return move_it ;
 }
 
 struct vec {
@@ -195,20 +195,20 @@ struct angular_sector {
 		assert(i.c.c == o.c.c);
 		assert(i.theta1 == o.theta1);
 		assert(i.theta2 == o.theta2);
-		
-	}
-    bool is_in_sector(vec p) const{
-        if(inner.is_in_pie(p) && (p-inner.c.c).norm() <=outer.c.r && inner.c.r <=(p-inner.c.c).norm())return true;
-	return false;
-    }
 
-    double dist(vec p) const{
-	if (is_in_sector(p)) return 0;
-	return std::min(std::min(std::min(inner.dist(p),outer.dist(p)),
-				 segment(vec::from_polar(inner.c.r,inner.theta1)+inner.c.c,
-					 vec::from_polar(outer.c.r,inner.theta2)+inner.c.c).dist(p)),
-			segment(vec::from_polar(inner.c.r,inner.theta2)+inner.c.c,
-				vec::from_polar(outer.c.r,inner.theta2)+inner.c.c).dist(p)) ;
-    }
+	}
+	bool is_in_sector(vec p) const{
+		if(inner.is_in_pie(p) && (p-inner.c.c).norm() <=outer.c.r && inner.c.r <=(p-inner.c.c).norm())return true;
+		return false;
+	}
+
+	double dist(vec p) const{
+		if (is_in_sector(p)) return 0;
+		return std::min(std::min(std::min(inner.dist(p),outer.dist(p)),
+					segment(vec::from_polar(inner.c.r,inner.theta1)+inner.c.c,
+						vec::from_polar(outer.c.r,inner.theta2)+inner.c.c).dist(p)),
+				segment(vec::from_polar(inner.c.r,inner.theta2)+inner.c.c,
+					vec::from_polar(outer.c.r,inner.theta2)+inner.c.c).dist(p)) ;
+	}
 };
 /* vim: set ts=4 sw=4 tw=0 noet :*/

@@ -46,7 +46,7 @@ struct hilare_a {	// System A
 		return vec(xc, yc);
 	}
 
-    	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
+	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
 
 };
 
@@ -82,10 +82,10 @@ struct hilare_a_mvt {
 	double ds;					// longueur par
 
 	double length();			// length of a movement
-    
+
 	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
 
-    	bool intersects(const problem &p) const;	// intersects any obstacle on the map ?
+	bool intersects(const problem &p) const;	// intersects any obstacle on the map ?
 };
 
 struct solution {
@@ -116,28 +116,28 @@ class solver {
 
 	private:
 
-	sf::Mutex _d_lock;
-	solver_internal _d;
-	problem _p;
+		sf::Mutex _d_lock;
+		solver_internal _d;
+		problem _p;
 
-	bool _please_stop;
-	bool _running;
-	bool _done;
-	solution _s;
-	
-	sf::Thread _worker;
+		bool _please_stop;
+		bool _running;
+		bool _done;
+		solution _s;
+
+		sf::Thread _worker;
 
 	public:
-	solver();
+		solver();
 
-	void start(const problem &p);
+		void start(const problem &p);
 
-	void run();	// worker thread
+		void run();	// worker thread
 
-	bool finished();
-	solution get_solution();
+		bool finished();
+		solution get_solution();
 
-	solver_internal peek_internal();
+		solver_internal peek_internal();
 };
 
 
