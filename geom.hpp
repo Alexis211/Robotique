@@ -7,6 +7,12 @@
 #define EPSILON 1e-6
 #define abs(x) ((x)<0?-(x):(x))
 
+double canon_angle(double ref, double move_it){
+    while (ref>move_it) move_it += 2*M_PI;
+    while (move_it >= ref + 2*M_PI) move_it -= 2*M_PI;
+    return move_it ;
+}
+
 struct vec {
 	double x, y;
 
