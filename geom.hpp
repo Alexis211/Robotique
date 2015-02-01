@@ -1,11 +1,17 @@
 #pragma once
 
+#include <stdlib.h>
 #include <math.h>
 #include <algorithm>
 #include <assert.h>
 
 #define EPSILON 1e-6
 #define abs(x) ((x)<0?-(x):(x))
+
+inline double frand(double a, double b) {
+	double r = ((double)rand()) / ((double)RAND_MAX);
+	return r * (b - a) + a;
+}
 
 struct vec {
 	double x, y;

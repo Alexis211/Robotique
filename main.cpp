@@ -3,6 +3,8 @@
 #include "ui.hpp"
 
 int main() {
+	srand(time(0));
+
 	hilare_a_param p;
 	p.l = 50;
 	p.r_c_car = 25;

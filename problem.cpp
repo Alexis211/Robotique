@@ -48,8 +48,8 @@ bool hilare_a_mvt::intersects(const obstacle &o) const {
 }
 
 bool hilare_a_mvt::intersects(const problem &p) const {
-	for (auto i = p.obstacles.begin(); i != p.obstacles.end(); i++) {
-		if (intersects(*i)) return true;
+	for (auto& i: p.obstacles) {
+		if (intersects(i)) return true;
 	}
 	return false;
 }
@@ -212,10 +212,28 @@ solution solver_internal::try_find_solution() {
 
 void solver_internal::step(const problem &p) {
 	// take new random point
-	// try to connect to all existing points
+	double min_x = p.obstacles[0].c.c.x, min_y = p.obstacles[0].c.c.y;
+	double max_x = min_x, max_y = min_y;
+	for (auto& o: p.obstacles) {
+		if (o.c.c.x < min_x) min_x = o.c.c.x;
+		if (o.c.c.y < min_y) min_y = o.c.c.y;
+		if (o.c.c.x > max_x) max_x = o.c.c.x;
+		if (o.c.c.y > max_y) max_y = o.c.c.y;
+	}
+	hilare_a rp = p.begin_pos;
+	rp.x = frand(min_x, max_x);
+	rp.y = frand(min_y, max_y);
+	rp.theta = frand(-M_PI, M_PI);
+	rp.phi = frand(-M_PI, M_PI);
 
-	// TODO
-	sf::sleep(sf::milliseconds(10));	// no CPU hog
+	// try to connect to all existing points
+	for (unsigned i = 0; i < pts.size(); i++) {
+		solution s = solution::direct_sol(pts[i], rp);
+		if (s.movement.size() > 0 && !s.intersects(p)) {
+			paths[i][pts.size()] = s;
+		}
+	}
+	pts.push_back(rp);
 }
 
 /* vim: set ts=4 sw=4 tw=0 noet :*/
