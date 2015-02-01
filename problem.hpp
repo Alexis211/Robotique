@@ -7,6 +7,7 @@
 
 struct obstacle {
 	circle c;
+	obstacle(circle cc) : c(cc) {}
 };
 
 struct hilare_a_param {
@@ -48,6 +49,7 @@ struct hilare_a_mvt {
 	// deux étapes dans le mouvement :
 	// - bien orienter la voiture (c'est l'angle dtheta_before)
 	// - avancer/reculer sur le cercle (c'est l'angle domega)
+	hilare_a_mvt() : center(0, 0) {}
 
 	hilare_a from, to;
 

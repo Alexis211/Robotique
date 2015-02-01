@@ -4,9 +4,9 @@
 
 int main() {
 	hilare_a_param p;
-	p.l = 30;
-	p.r_c_car = 15;
-	p.r_c_trolley = 12;
+	p.l = 50;
+	p.r_c_car = 25;
+	p.r_c_trolley = 20;
 
 	UI the_ui(&p);
 
