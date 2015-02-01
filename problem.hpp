@@ -32,6 +32,9 @@ struct hilare_a {	// System A
 	vec pos_trolley() const {
 		return pos() + param->l * dir_trolley();
 	}
+
+    	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
+
 };
 
 struct problem {
@@ -66,9 +69,10 @@ struct hilare_a_mvt {
 	double ds;					// longueur par
 
 	double length();			// length of a movement
+    
+	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
 
-	bool intersects(const obstacle& o) const;	// intersects an obstacle ?
-	bool intersects(const problem &p) const;	// intersects any obstacle on the map ?
+    	bool intersects(const problem &p) const;	// intersects any obstacle on the map ?
 };
 
 struct solution {

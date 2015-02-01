@@ -181,16 +181,19 @@ struct angular_sector {
 
 	angular_sector(circarc i, circarc o) : inner(i), outer(o) {
 		assert(i.c.c == o.c.c);
+		assert(i.theta1 == o.theta1);
+		assert(i.theta2 == o.theta2);
+		
 	}
     bool is_in_sector(vec p) const{
-	//TODO
+        
 	return false;
     }
 
     double dist(vec p) const{
 	if (is_in_sector(p)) return 0;
 	//TODO
-	return 29 ;
+	return 42 ;
     }
 };
 /* vim: set ts=4 sw=4 tw=0 noet :*/

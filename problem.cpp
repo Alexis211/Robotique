@@ -11,12 +11,39 @@ using namespace std;
 
 double hilare_a_mvt::length() {
 	// returns length traveled by the car
-	// TODO : two cases
-	return domega * (center - from.pos()).norm();
+    if (is_arc)	return domega * (center - from.pos()).norm();
+    return ds ;
+}
+
+bool hilare_a::intersects(const obstacle &o) const {
+    
+    if((pos()-o.c.c).norm() < o.c.r + param->r_c_car)return true ;
+    if((pos_trolley()-o.c.c).norm() < o.c.r + param->r_c_trolley)return true ;
+    if(segment(pos(),pos_trolley()).dist(o.c.c) < o.c.r)return true ;
+    return false ;
 }
 
 bool hilare_a_mvt::intersects(const obstacle &o) const {
-	// TODO
+    hilare_a_param *p = from.param;
+    vec pos_init = from.pos();
+    vec pos_init_trolley = from.pos_trolley();
+    if(is_arc){
+	double r_min =
+	    min((pos_init - center).norm()-(p->r_c_car),
+		(pos_init_trolley - center).norm()-(p->r_c_trolley));
+	double r_max =
+	    max((pos_init - center).norm()+(p->r_c_car),
+		(pos_init_trolley - center).norm()+(p->r_c_trolley));
+	//TODO
+	 double theta1 = 0;
+	double theta2 = 0;
+    angular_sector sector = angular_sector(circarc(circle(center,r_min), theta1, theta2), circarc(circle(center,r_max), theta1, theta2));
+    if (sector.dist(o.c.c)<=o.c.r)return true;
+    if (from.intersects(o)) return true;
+    if (to.intersects(o)) return true;
+    return false;
+    
+    }
 	return false;
 }
 
