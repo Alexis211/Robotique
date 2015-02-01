@@ -88,7 +88,7 @@ struct line {
 		vec d = p2 - p1;
 		a = d.y ;
 		b = -d.x ;
-		c = - (p1.x * a + p2.x * b);
+		c = - (p1.x * a + p1.y * b);
 	}
 
 	bool on_line(vec p) const {
