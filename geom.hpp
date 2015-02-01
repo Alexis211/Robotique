@@ -188,7 +188,7 @@ struct circarc {
 };
 
 struct angular_sector {
-	// attention, les circarc doivent avoir le même centre
+	// attention, les circarc doivent avoir le même centre et les mêmes angles
 	circarc inner, outer;
 
 	angular_sector(circarc i, circarc o) : inner(i), outer(o) {
@@ -198,14 +198,17 @@ struct angular_sector {
 		
 	}
     bool is_in_sector(vec p) const{
-        
+        if(inner.is_in_pie(p) && (p-inner.c.c).norm() <=outer.c.r && inner.c.r <=(p-inner.c.c).norm())return true;
 	return false;
     }
 
     double dist(vec p) const{
 	if (is_in_sector(p)) return 0;
-	//TODO
-	return 42 ;
+	return std::min(std::min(std::min(inner.dist(p),outer.dist(p)),
+				 segment(vec::from_polar(inner.c.r,inner.theta1)+inner.c.c,
+					 vec::from_polar(outer.c.r,inner.theta2)+inner.c.c).dist(p)),
+			segment(vec::from_polar(inner.c.r,inner.theta2)+inner.c.c,
+				vec::from_polar(outer.c.r,inner.theta2)+inner.c.c).dist(p)) ;
     }
 };
 /* vim: set ts=4 sw=4 tw=0 noet :*/

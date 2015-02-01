@@ -35,8 +35,29 @@ bool hilare_a_mvt::intersects(const obstacle &o) const {
 	    max((pos_init - center).norm()+(p->r_c_car),
 		(pos_init_trolley - center).norm()+(p->r_c_trolley));
 	//TODO
-	 double theta1 = 0;
-	double theta2 = 0;
+	double theta1;
+	double theta2;
+	if (domega>=0) {
+	    if(from.phi > 0){
+		theta1 = (from.pos()-center).angle();
+		theta2 = (to.pos_trolley()-center).angle();
+	    }
+	    else {
+		theta1 = (from.pos_trolley()-center).angle();
+		theta2 = (to.pos()-center).angle();
+		}
+	}
+	else {
+	    if(from.phi > 0){ //TODO ??
+		theta2 = (from.pos()-center).angle();
+		theta1 = (to.pos_trolley()-center).angle();
+	    }
+	    else {
+		theta2 = (from.pos_trolley()-center).angle();
+		theta1 = (to.pos()-center).angle();
+		}
+	}
+	theta2 = canon_angle(theta1,theta2);
     angular_sector sector = angular_sector(circarc(circle(center,r_min), theta1, theta2), circarc(circle(center,r_max), theta1, theta2));
     if (sector.dist(o.c.c)<=o.c.r)return true;
     if (from.intersects(o)) return true;
