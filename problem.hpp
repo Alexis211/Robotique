@@ -91,10 +91,12 @@ struct solution {
 	solution(const std::vector<hilare_a_mvt> &m) : movement(m) {}
 
 	// simple direct solution from A to B, takes into account no obstacles
-	static solution direct_sol(const hilare_a &pos_a, const hilare_a &pos_b);
+	static std::vector<solution> direct_sol(const hilare_a &pos_a, const hilare_a &pos_b);
 
 	// check if a solution intersects an obstacle of problem
 	bool intersects(const problem &p) const;
+
+	double length();
 };
 
 struct solver_internal {
@@ -106,6 +108,9 @@ struct solver_internal {
 	void initialize(const problem &p);
 	solution try_find_solution();
 	void step(const problem &p);
+
+	// internal
+	void find_direct_path(int a, int b, const problem &p);
 };
 
 class solver {

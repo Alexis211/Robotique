@@ -80,7 +80,8 @@ bool hilare_a_mvt::intersects(const problem &p) const {
 // IMPLEMENTATION FOR CLASS SOLUTION //
 // ================================= //
 
-solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
+vector<solution> solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
+	vector<solution> ret;
 
 	// première famille de mouvements :
 	// - trouver les quatre droites tangentes aux deux cercles canoniques
@@ -127,34 +128,43 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 		vec w = l.proj(ccb);
 
 		double domega1 = (v - cca).angle() - (pos_a.pos_trolley() - cca).angle();
+		if (domega1 > M_PI) domega1 -= 2 * M_PI;
+		if (domega1 < -M_PI) domega1 += 2 * M_PI;
 		double dtheta1 = pos_a.phi;
 		double dtheta2 = -pos_b.phi;
 		double domega2 = (pos_b.pos_trolley() - ccb).angle() - (w - ccb).angle();
+		if (domega2 > M_PI) domega2 -= 2 * M_PI;
+		if (domega2 < -M_PI) domega2 += 2 * M_PI;
+
 		double xx = pos_a.theta + domega1 + dtheta1 + dtheta2 + domega2 - pos_b.theta;
 		cout << "domega1: " << domega1
 			<< ", domega2: " << domega2
 			<< ", xx:" << xx << endl;
+
 		if (fabs(xx) < 0.01 || fabs(xx - 2*M_PI) < 0.01 && fabs(xx + 2*M_PI) < 0.01) {
 			vector<hilare_a_mvt> sol;
 
+			vec p1 = cca + vec::from_polar((pos_a.pos() - cca).norm(), (pos_a.pos() - cca).angle() + domega1);
+			vec p2 = ccb + vec::from_polar((pos_b.pos() - ccb).norm(), (pos_b.pos() - ccb).angle() - domega2);
+
 			hilare_a_mvt r1;
+			r1.dtheta_before = 0;
 			r1.is_arc = true;
-			r1.from = pos_a;
-			r1.to = pos_a;
-			r1.to.x = v.x; r1.to.y = v.y;
-			r1.to.theta = r1.from.theta + domega1;
 			r1.center = cca;
 			r1.domega = domega1;
-			r1.dtheta_before = 0;
+			r1.from = pos_a;
+			r1.to = pos_a;
+			r1.to.x = p1.x; r1.to.y = p1.y;
+			r1.to.theta = r1.from.theta + domega1;
 			sol.push_back(r1);
 
 			hilare_a_mvt t;
-			t.from = r1.to;
-			t.to = t.from;
-			t.to.x = w.x; t.to.y = w.y; t.to.phi = 0;
 			t.is_arc = false;
 			t.ds = (w - v).norm();
-			t.dtheta_before = t.from.phi;
+			t.dtheta_before = r1.to.phi;
+			t.from = r1.to;
+			t.to = t.from; t.to.theta = t.from.theta + t.dtheta_before;
+			t.to.x = p2.x; t.to.y = p2.y; t.to.phi = 0;
 			sol.push_back(t);
 
 			hilare_a_mvt r2;
@@ -166,11 +176,11 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 			r2.domega = domega2;
 			sol.push_back(r2);
 
-			return solution(sol);
+			ret.push_back(sol);
 		}
 	}
 
-	return solution();	// empty solution
+	return ret;
 }
 
 bool solution::intersects(const problem &p) const {
@@ -178,6 +188,14 @@ bool solution::intersects(const problem &p) const {
 		if (x.intersects(p)) return true;
 	}
 	return false;
+}
+
+double solution::length() {
+	double x;
+	for (auto& m: movement) {
+		x += m.length();
+	}
+	return x;
 }
 
 // =============================== //
@@ -265,10 +283,7 @@ void solver_internal::initialize(const problem &p) {
 	pts.push_back(p.begin_pos);
 	pts.push_back(p.end_pos);
 
-	solution ts = solution::direct_sol(p.begin_pos, p.end_pos);
-	if (ts.movement.size() > 0 && !ts.intersects(p)) {
-		paths[0][1] = ts;
-	}
+	find_direct_path(0, 1, p);
 }
 
 solution solver_internal::try_find_solution() {
@@ -338,18 +353,24 @@ void solver_internal::step(const problem &p) {
 	rp.theta = frand(-M_PI, M_PI);
 	rp.phi = frand(-M_PI, M_PI);
 
+	pts.push_back(rp);
+
 	// try to connect to all existing points
-	for (unsigned i = 0; i < pts.size(); i++) {
-		solution s = solution::direct_sol(pts[i], rp);
-		if (s.movement.size() > 0 && !s.intersects(p)) {
-			paths[i][pts.size()] = s;
-		}
-		solution ss = solution::direct_sol(rp, pts[i]);
-		if (ss.movement.size() > 0 && !ss.intersects(p)) {
-			paths[pts.size()][i] = ss;
+	for (unsigned i = 0; i < pts.size() - 1; i++) {
+		find_direct_path(i, pts.size() - 1, p);
+		find_direct_path(pts.size() - 1, i, p);
+	}
+}
+
+void solver_internal::find_direct_path(int a, int b, const problem &p) {
+	vector<solution> s = solution::direct_sol(pts[a], pts[b]);
+	int best = -1;
+	for (int k = 0; k < s.size(); k++) {
+		if (s[k].movement.size() > 0 && !s[k].intersects(p)) {
+			if (best == -1 || s[k].length() < s[best].length()) best = k;
 		}
 	}
-	pts.push_back(rp);
+	if (best != -1) paths[a][b] = s[best];
 }
 
 /* vim: set ts=4 sw=4 tw=0 noet :*/
