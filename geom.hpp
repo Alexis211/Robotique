@@ -85,9 +85,10 @@ struct line {
 
 	line(double aa, double bb, double cc) : a(aa), b(bb), c(cc) {}
 	line(vec p1, vec p2) {
-		a = p1.x-p2.x ;
-		b = p1.y-p2.y ;
-		c = p1.x*(p2.x-p1.x)+p1.y*(p2.y-p1.y);
+		vec d = p2 - p1;
+		a = d.y ;
+		b = -d.x ;
+		c = - (p1.x * a + p2.x * b);
 	}
 
 	bool on_line(vec p) const {
@@ -129,8 +130,7 @@ struct segment {
 	double dist(vec p) const {
 		double scal = vec::dot(b-a, p-a);
 		double sqn = (b-a).sqnorm();
-		if (scal > sqn) return (p-b).norm();
-		if (scal < 0) return (p-a).norm();
+		if (scal > sqn || scal < 0) return std::min((p-b).norm(), (p-a).norm());
 		return line(a,b).dist(p);
 	}
 };
