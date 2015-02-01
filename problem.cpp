@@ -12,7 +12,7 @@ using namespace std;
 
 double hilare_a_mvt::length() {
 	// returns length traveled by the car
-	if (is_arc)	return domega * (center - from.pos()).norm();
+	if (is_arc)	return fabs(domega) * (center - from.pos()).norm();
 	return ds ;
 }
 
