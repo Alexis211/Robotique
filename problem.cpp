@@ -1,4 +1,5 @@
 #include <deque>
+#include <iostream>
 
 #include "problem.hpp"
 
@@ -80,7 +81,6 @@ bool hilare_a_mvt::intersects(const problem &p) const {
 // ================================= //
 
 solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
-	vector<hilare_a_mvt> sol;
 
 	// première famille de mouvements :
 	// - trouver les quatre droites tangentes aux deux cercles canoniques
@@ -96,7 +96,6 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 	vec ccb = pos_b.canon_curve_center();
 	double rcb = (ccb - pos_b.pos_trolley()).norm();
 
-	vector<line> tgt_ls;
 	int eps[4][2] = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
 	double delta = cca.x * ccb.y - cca.y * ccb.x;
 	assert(delta != 0);
@@ -107,12 +106,74 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 
 		double a = ((ea * rca - 1) * ccb.y - cca.y * (eb * rcb - 1)) / delta;
 		double b = (cca.x * (eb * rcb - 1) - ccb.x * (ea * rca - 1)) / delta;
-		tgt_ls.push_back(line(a, b, 1));
+
+		line l(a, b, 1);
+
+		vec uv = vec(a, b).normalize();
+
+		vec pa(0,0);
+		if (l.on_line(cca + rca * uv)) {
+			pa = cca + rca * uv;
+		} else if (l.on_line(cca - rca * uv)) {
+			pa = cca - rca * uv;
+		} else {
+			assert(false);	// calculs de merde
+		}
+
+		vec pb(0,0);
+		if (l.on_line(ccb + rcb * uv)) {
+			pb = ccb + rcb * uv;
+		} else if (l.on_line(ccb - rcb * uv)) {
+			pb = ccb - rcb * uv;
+		} else {
+			assert(false);
+		}
+
+		double domega1 = (pa - cca).angle() - (pos_a.pos_trolley() - cca).angle();
+		double domega2 = (pos_b.pos_trolley() - ccb).angle() - (pb - ccb).angle();
+		double xx = pos_a.theta + domega1 + domega2 - pos_b.theta;
+
+		cout << "domega1: " << domega1
+			<< ", domega2: " << domega2
+			<< ", xx:" << xx << endl;
+
+		if (fabs(xx) < 0.01 || fabs(xx - 2*M_PI) < 0.01 && fabs(xx + 2*M_PI) < 0.01) {
+			vector<hilare_a_mvt> sol;
+			
+			hilare_a_mvt r1;
+			r1.is_arc = true;
+			r1.from = pos_a;
+			r1.to = pos_a;
+			r1.to.x = pa.x; r1.to.y = pa.y;
+			r1.to.theta = r1.from.theta + domega1;
+			r1.center = cca;
+			r1.domega = domega1;
+			r1.dtheta_before = 0;
+			sol.push_back(r1);
+
+			hilare_a_mvt t;
+			t.from = r1.to;
+			t.to = t.from;
+			t.to.x = pb.x; t.to.y = pb.y;
+			t.is_arc = false;
+			t.ds = (pb - pa).norm();
+			t.dtheta_before = t.from.phi;
+			sol.push_back(t);
+
+			hilare_a_mvt r2;
+			r2.from = t.to;
+			r2.to = pos_b;
+			r2.is_arc = true;
+			r2.dtheta_before = -pos_b.phi;
+			r2.center = ccb;
+			r2.domega = domega2;
+			sol.push_back(r2);
+
+			return solution(sol);
+		}
 	}
 
-	//TODO
-
-	return solution(sol);
+	return solution();	// empty solution
 }
 
 bool solution::intersects(const problem &p) const {
@@ -164,7 +225,7 @@ void solver::run() {
 			break;
 		}
 
-		if (!_please_stop) break;
+		if (_please_stop) break;
 
 		d.step(p);
 
@@ -196,6 +257,8 @@ solver_internal solver::peek_internal() {
 }
 
 void solver_internal::initialize(const problem &p) {
+	cout << "Initializing solver..." << endl;
+
 	paths.clear();
 	pts.clear();
 
@@ -203,12 +266,13 @@ void solver_internal::initialize(const problem &p) {
 	pts.push_back(p.end_pos);
 
 	solution ts = solution::direct_sol(p.begin_pos, p.end_pos);
-	if (!ts.intersects(p)) {
+	if (ts.movement.size() > 0 && !ts.intersects(p)) {
 		paths[0][1] = ts;
 	}
 }
 
 solution solver_internal::try_find_solution() {
+	cout << "Looking for solution in current graph..." << endl;
 	// Simple graph search algorithm
 
 	vector<int> par(pts.size(), -1);
@@ -234,6 +298,8 @@ solution solver_internal::try_find_solution() {
 	}
 
 	if (par[1] != -1) {
+		cout << "...found!" << endl;
+
 		vector<hilare_a_mvt> sol;
 
 		int b = 1;
@@ -250,13 +316,16 @@ solution solver_internal::try_find_solution() {
 		return solution(sol);
 	}
 
+	cout << "...not found." << endl;
 	return solution();	// not found
 }
 
 void solver_internal::step(const problem &p) {
+	cout << "Solver step..." << endl;
+
 	// take new random point
-	double min_x = p.obstacles[0].c.c.x, min_y = p.obstacles[0].c.c.y;
-	double max_x = min_x, max_y = min_y;
+	double min_x = -100, min_y = -100;
+	double max_x = 800, max_y = 800;
 	for (auto& o: p.obstacles) {
 		if (o.c.c.x < min_x) min_x = o.c.c.x;
 		if (o.c.c.y < min_y) min_y = o.c.c.y;
