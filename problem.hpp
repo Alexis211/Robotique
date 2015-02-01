@@ -33,6 +33,19 @@ struct hilare_a {	// System A
 		return pos() + param->l * dir_trolley();
 	}
 
+	vec canon_curve_center() const {
+		double delta = cos(theta) * sin(theta + phi) - sin(theta) * cos(theta + phi);
+		assert(delta != 0);
+
+		vec a = pos();
+		vec b = pos_trolley();
+		vec eth = vec::from_polar(1, theta);
+		vec ethph = vec::from_polar(1, theta + phi);
+		double xc = (vec::dot(a, eth) * sin(theta + phi) - vec::dot(b, ethph) * sin(theta)) / delta;
+		double yc = (cos(theta) * vec::dot(b, ethph) - cos(theta + phi) * vec::dot(a, eth));
+		return vec(xc, yc);
+	}
+
     	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
 
 };

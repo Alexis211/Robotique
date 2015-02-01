@@ -61,13 +61,35 @@ bool hilare_a_mvt::intersects(const problem &p) const {
 solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 	vector<hilare_a_mvt> sol;
 
-	// TODO: try different possibilities and chose the shortest one
-	hilare_a_mvt mvt;
-	mvt.from = pos_a;
-	mvt.to = pos_b;
-	mvt.is_arc = false;
-	// la suite à compléter
-	sol.push_back(mvt);
+	// première famille de mouvements :
+	// - trouver les quatre droites tangentes aux deux cercles canoniques
+	// - pour chacune de ces droites, se mettre dessus, aller droit, s'en séparer
+	//   (vérifier la cohérence : il n'y en a que deux qui sont dans le bon sens !)
+	
+	// cas où la position de départ ou d'arrivée n'a pas pour courbe canonique un cercle : se tourner de pi/6 par exemple
+	// (ce cas n'arrivera pas, car on tire complètement au hasard...)
+
+	// calcul des centres des courbes canoniques
+	vec cca = pos_a.canon_curve_center();
+	double rca = (cca - pos_a.pos_trolley()).norm();
+	vec ccb = pos_b.canon_curve_center();
+	double rcb = (ccb - pos_b.pos_trolley()).norm();
+
+	vector<line> tgt_ls;
+	int eps[4][2] = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
+	double delta = cca.x * ccb.y - cca.y * ccb.x;
+	assert(delta != 0);
+
+	for (int i_eps = 0; i_eps < 4; i_eps++) {
+		int ea = eps[i_eps][0];
+		int eb = eps[i_eps][1];
+
+		double a = ((ea * rca - 1) * ccb.y - cca.y * (eb * rcb - 1)) / delta;
+		double b = (cca.x * (eb * rcb - 1) - ccb.x * (ea * rca - 1)) / delta;
+		tgt_ls.push_back(line(a, b, 1));
+	}
+
+	//TODO
 
 	return solution(sol);
 }
