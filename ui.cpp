@@ -107,7 +107,7 @@ void UI::handle_normal(const sf::Event &ev) {
 		if (k == 'd') {
 			vec p = mouse_coord();
 			vector<obstacle> o2;
-			for(auto i: _p.obstacles) {
+			for(auto& i: _p.obstacles) {
 				if (!i.c.intersects(p)) o2.push_back(i);
 			}
 			_p.obstacles = o2;
@@ -187,21 +187,6 @@ void UI::render_circle(const circle &c, sf::Color border, sf::Color inside, int 
 	_win.draw(a);
 }
 
-void UI::render_seg(vec a, vec b, sf::Color c, int w) {
-	sf::ConvexShape l;
-
-	l.setPointCount(4);
-	l.setPoint(0, to_view(a));
-	l.setPoint(1, to_view(b));
-	l.setPoint(2, to_view(b));
-	l.setPoint(3, to_view(a));
-
-	l.setOutlineColor(c);
-	l.setOutlineThickness(w);
-
-	_win.draw(l);
-}
-
 void UI::render_pos(const hilare_a &pos, sf::Color c) {
 	render_circle(circle(pos.pos(), pos.param->r_c_car), c, sf::Color::Transparent, 2);
 
@@ -223,8 +208,34 @@ void UI::render_obstacle(const obstacle &o) {
 	render_circle(o.c, sf::Color::Transparent, sf::Color(100, 100, 100), 0);
 }
 
-void UI::render_mvt(const hilare_a_mvt &m) {
-	// TODO
+void UI::render_mvt(const hilare_a_mvt &m, sf::Color c) {
+	if (m.is_arc) {
+		sf::Vertex l[20];
+
+		l[0] = sf::Vertex(to_view(m.from.pos()), c);
+
+		double th = (m.from.pos() - m.center).angle();
+		double r = (m.from.pos() - m.center).norm();
+		for (int i = 1; i < 19; i++) {
+			l[i] = sf::Vertex(to_view(m.center + vec::from_polar(r, th + m.domega * i / 20)), c);
+		}
+
+		l[19] = sf::Vertex(to_view(m.to.pos()), c);
+
+		_win.draw(l, 20, sf::Lines);
+	} else {
+		sf::Vertex l[] = {
+			sf::Vertex(to_view(m.from.pos()), c),
+			sf::Vertex(to_view(m.to.pos()), c),
+		};
+		_win.draw(l, 2, sf::Lines);
+	}
+}
+
+void UI::render_sol(const solution &s, sf::Color c) {
+	for (auto i: s.movement) {
+		render_mvt(i, c);
+	}
 }
 
 void UI::render_problem() {
@@ -240,12 +251,22 @@ void UI::render_solution() {
 	for (auto i = _s.movement.begin(); i != _s.movement.end(); i++) {
 		if (i != _s.movement.begin())
 			render_pos(i->from, sf::Color::Green);
-		render_mvt(*i);
 	}
+	render_sol(_s.movement, sf::Color::Green);
 }
 
 void UI::render_internal() {
-	// TODO
+	solver_internal x = _solver.peek_internal();
+
+	for (auto& p: x.pts) {
+		render_pos(p, sf::Color(42, 42, 42));
+	}
+
+	for (auto& kv: x.paths) {
+		for (auto kv2: kv.second) {
+			render_sol(kv2.second, sf::Color(42, 42, 42));
+		}
+	}
 }
 
 sf::Vector2f UI::to_view(const vec &p) {

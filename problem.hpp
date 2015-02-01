@@ -86,14 +86,14 @@ struct solver_internal {
 	// intermediate data for the solver
 	// represents a graph of randomly chosen positions and simple solutions between them
 	std::vector<hilare_a> pts;
-	std::map<int, std::map<int, hilare_a_mvt> > paths;
+	std::map<int, std::map<int, solution> > paths;
 };
 
 class solver {
 	// mutex-protected asynchronous structure
 
 	private:
-	//todo
+	solver_internal _d;
 
 	public:
 	solver();
@@ -101,6 +101,8 @@ class solver {
 	void start(const problem &p);
 	bool finished();
 	solution get_solution();
+
+	solver_internal peek_internal();
 };
 
 

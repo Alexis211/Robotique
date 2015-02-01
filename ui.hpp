@@ -26,8 +26,8 @@ class UI {
 	hilare_a_param *_param;
 
 	problem _p;
-
 	solution _s;
+	solver _solver;
 
 	struct {
 		double x0, y0, zoom;
@@ -49,11 +49,11 @@ class UI {
 	void handle_sel_pos(const sf::Event &ev);
 
 	void render_circle(const circle& c, sf::Color border, sf::Color inside, int linewidth);
-	void render_seg(vec a, vec b, sf::Color l, int w);
 
 	void render_pos(const hilare_a &pos, sf::Color c);
 	void render_obstacle(const obstacle &o);
-	void render_mvt(const hilare_a_mvt &m);
+	void render_mvt(const hilare_a_mvt &m, sf::Color c);
+	void render_sol(const solution &s, sf::Color c);
 
 	void render_problem();
 	void render_solution();

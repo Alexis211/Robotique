@@ -46,6 +46,12 @@ solution solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos_b) {
 // IMPLEMENTATION FOR CLASS SOLVER //
 // =============================== //
 
-// TODO
+solver::solver() {
+	// nothing ?
+}
+
+solver_internal solver::peek_internal() {
+	return _d;
+}
 
 /* vim: set ts=4 sw=4 tw=0 noet :*/
