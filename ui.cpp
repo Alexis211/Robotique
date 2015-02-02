@@ -299,7 +299,10 @@ void UI::render_internal() {
 }
 
 void UI::do_follow() {
-	if (_s.movement.size() == 0) return;
+	if (_s.movement.size() == 0 || _follow_s >= _s.movement.size()) {
+		_follow = false;
+		return;
+	}
 
 	hilare_a_mvt &m = _s.movement[_follow_s];
 
@@ -310,25 +313,25 @@ void UI::do_follow() {
 
 	if (m.dtheta_before != 0) {
 		_follow_pos = m.from;
-		if (s < divide / 2) {
-			_follow_pos.theta += m.dtheta_before * s / (divide / 2);
-			_follow_pos.phi -= m.dtheta_before * s / (divide / 2);
+		if (s < 30) {
+			_follow_pos.theta += m.dtheta_before * s / 30;
+			_follow_pos.phi -= m.dtheta_before * s / 30;
 		} else {
-			s -= divide / 2;
-			s *= 2;
+			s -= 30;
+			int dd = divide - 30;
 
 			_follow_pos.theta += m.dtheta_before;
 			_follow_pos.phi -= m.dtheta_before;
 
 			if (m.is_arc) {
-				_follow_pos.theta += m.domega * s / divide;
+				_follow_pos.theta += m.domega * s / dd;
 
-				vec p = m.center + vec::from_polar((m.from.pos() - m.center).norm(), (m.from.pos() - m.center).angle() + m.domega * s / divide);
+				vec p = m.center + vec::from_polar((m.from.pos() - m.center).norm(), (m.from.pos() - m.center).angle() + m.domega * s / dd);
 				_follow_pos.x = p.x;
 				_follow_pos.y = p.y;
 			} else {
-				_follow_pos.x = (s * m.to.x + (divide - s) * m.from.x) / divide;
-				_follow_pos.y = (s * m.to.y + (divide - s) * m.from.y) / divide;
+				_follow_pos.x = (s * m.to.x + (dd - s) * m.from.x) / dd;
+				_follow_pos.y = (s * m.to.y + (dd - s) * m.from.y) / dd;
 			}
 		}
 	} else {
