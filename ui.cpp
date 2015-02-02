@@ -199,7 +199,7 @@ void UI::handle_sel_pos(const sf::Event &ev) {
 
 void UI::render_circle(const circle &c, sf::Color border, sf::Color inside, int w) {
 	double r = c.r * _view.zoom;
-	sf::CircleShape a(r);
+	sf::CircleShape a(r, 50);
 	a.setPosition(to_view(c.c));
 	a.move(-r, -r);
 	a.setFillColor(inside);
@@ -375,7 +375,7 @@ vec UI::from_view(const sf::Vector2i &p) {
 }
 
 vec UI::mouse_coord() {
-	return from_view(sf::Mouse::getPosition() - _win.getPosition());
+	return from_view(sf::Mouse::getPosition(_win));
 }
 
 /* vim: set ts=4 sw=4 tw=0 noet :*/

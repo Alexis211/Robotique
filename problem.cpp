@@ -110,7 +110,7 @@ vector<solution> solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos
 
 	int eps[4][2] = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
 	double delta = cca.x * ccb.y - cca.y * ccb.x;
-	assert(delta != 0);
+	if (delta == 0) return ret;	// no solution in this case, we count on direct_sol_r
 
 	for (int i_eps = 0; i_eps < 4; i_eps++) {
 		int ea = eps[i_eps][0];
