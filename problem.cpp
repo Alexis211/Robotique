@@ -66,7 +66,8 @@ bool hilare_a_mvt::intersects(const obstacle &o) const {
 		return false;
 
 	}
-	if (o.c.r >= segment(from.pos(),to.pos()).dist(o.c.c))return true ;
+	if (o.c.r + p->r_c_car >= segment(from.pos(),to.pos()).dist(o.c.c)) return true ;
+	if (o.c.r + p->r_c_trolley >= segment(from.pos_trolley(),to.pos_trolley()).dist(o.c.c)) return true ;
 	return false;
 }
 
