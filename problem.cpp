@@ -28,6 +28,8 @@ bool hilare_a_mvt::intersects(const obstacle &o) const {
 	hilare_a_param *p = from.param;
 	vec pos_init = from.pos();
 	vec pos_init_trolley = from.pos_trolley();
+	if (from.intersects(o)) return true;
+	if (to.intersects(o)) return true;
 	if(is_arc){
 		double r_min =
 			min((pos_init - center).norm()-(p->r_c_car),
@@ -61,8 +63,7 @@ bool hilare_a_mvt::intersects(const obstacle &o) const {
 		theta2 = canon_angle(theta1,theta2);
 		angular_sector sector = angular_sector(circarc(circle(center,r_min), theta1, theta2), circarc(circle(center,r_max), theta1, theta2));
 		if (sector.dist(o.c.c)<=o.c.r)return true;
-		if (from.intersects(o)) return true;
-		if (to.intersects(o)) return true;
+
 		return false;
 
 	}
