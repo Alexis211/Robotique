@@ -185,6 +185,56 @@ vector<solution> solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos
 	return ret;
 }
 
+std::vector<solution> solution::direct_sol_r(const hilare_a &pos_a, const hilare_a &pos_b) {
+	std::vector<solution> ret = direect_sol(pos_a, pos_b);
+
+	const int nnn = 8;
+	const double xa[nnn] = { -1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1 };
+
+	for (int aaa = 0; aaa < nnn; aaa++) {
+		double dtha = xa[aaa];
+
+		for (int bbb = 0; bbb < nnn; bbb++) {
+			double dthb = xa[bbb];
+
+			hilare_a pos_a_2 = pos_a;
+			pos_a_2.theta += dtha;
+			pos_a_2.phi -= dtha;
+			
+			hilare_a pos_b_2 = pos_b;
+			pos_b_2.theta -= dthb;
+			pos_b_2.phi += dthb;
+
+			vector<solution> ss = direct_sol(pos_a_2, pos_b_2);
+			for (auto& s: ss) {
+				vector<hilare_a_mvt> mvt;
+
+				hilare_a_mvt rb;
+				rb.from = pos_a;
+				rb.to = pos_a_2;
+				rb.dtheta_before = dtha;
+				rb.is_arc = false;
+				rb.ds = 0;
+				mvt.push_back(rb);
+
+				mvt.insert(mvt.end(), s.movement.begin(), s.movement.end());
+
+				hilare_a_mvt ra;
+				ra.from = pos_b_2;
+				ra.to = pos_b;
+				ra.dtheta_before = dthb;
+				ra.is_arc = false;
+				ra.ds = 0;
+				mvt.push_back(ra);
+
+				ret.push_back(solution(mvt));
+			}
+		}
+	}
+
+	return ret;
+}
+
 bool solution::intersects(const problem &p) const {
 	for (auto& x: movement) {
 		if (x.intersects(p)) return true;
@@ -341,8 +391,8 @@ void solver_internal::step(const problem &p) {
 	cout << "Solver step..." << endl;
 
 	// take new random point
-	double min_x = -800, min_y = -800;
-	double max_x = 800, max_y = 800;
+	double min_x = -200, min_y = -200;
+	double max_x = 200, max_y = 200;
 	for (auto& o: p.obstacles) {
 		if (o.c.c.x < min_x) min_x = o.c.c.x;
 		if (o.c.c.y < min_y) min_y = o.c.c.y;
@@ -365,7 +415,7 @@ void solver_internal::step(const problem &p) {
 }
 
 void solver_internal::find_direct_path(int a, int b, const problem &p) {
-	vector<solution> s = solution::direct_sol(pts[a], pts[b]);
+	vector<solution> s = solution::direct_sol_r(pts[a], pts[b]);
 	int best = -1;
 	for (int k = 0; k < s.size(); k++) {
 		if (s[k].movement.size() > 0 && !s[k].intersects(p)) {
