@@ -17,6 +17,8 @@ struct hilare_a_param {
 	double r_c_car, r_c_trolley;
 };
 
+struct problem;
+
 struct hilare_a {	// System A
 	hilare_a_param *param;
 
@@ -45,6 +47,7 @@ struct hilare_a {	// System A
 	}
 
 	bool intersects(const obstacle &o) const;	// intersects an obstacle ?
+	bool intersects(const problem &o) const;	// intersects an obstacle ?
 };
 
 struct problem {

@@ -37,6 +37,12 @@ class UI {
 	sf::ContextSettings _settings;
 	sf::RenderWindow _win;
 
+	// solution follow mode
+	bool _follow;
+	int _follow_s;
+	int _follow_d;
+	hilare_a _follow_pos;
+
 	// interaction mode
 	int _mode, _sel_step;
 	hilare_a _sel_pos;
@@ -59,6 +65,8 @@ class UI {
 	void render_problem();
 	void render_solution();
 	void render_internal();
+
+	void do_follow();
 
 	sf::Vector2f to_view(const vec &p);
 	vec from_view(const sf::Vector2f &p);

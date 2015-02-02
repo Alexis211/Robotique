@@ -24,6 +24,13 @@ bool hilare_a::intersects(const obstacle &o) const {
 	return false ;
 }
 
+bool hilare_a::intersects(const problem &o) const {
+	for (auto& a: o.obstacles) {
+		if (intersects(a)) return true;
+	}
+	return false ;
+}
+
 bool hilare_a_mvt::intersects(const obstacle &o) const {
 	hilare_a_param *p = from.param;
 	vec pos_init = from.pos();
@@ -140,9 +147,6 @@ vector<solution> solution::direct_sol(const hilare_a &pos_a, const hilare_a &pos
 		if (domega2 < -M_PI) domega2 += 2 * M_PI;
 
 		double xx = pos_a.theta + domega1 + dtheta1 + dtheta2 + domega2 - pos_b.theta;
-		cout << "domega1: " << domega1
-			<< ", domega2: " << domega2
-			<< ", xx:" << xx << endl;
 
 		if (fabs(xx) < 0.01 || fabs(xx - 2*M_PI) < 0.01 || fabs(xx + 2*M_PI) < 0.01) {
 			vector<hilare_a_mvt> sol;
@@ -287,8 +291,6 @@ void solver::run() {
 
 	int i = 0;
 	while (!_please_stop && (i++) < 300) {
-		sf::sleep(sf::milliseconds(100));
-
 		solution s = d.try_find_solution();
 		if (s.movement.size() > 0) {
 			_s = s;
@@ -392,19 +394,22 @@ void solver_internal::step(const problem &p) {
 	cout << "Solver step..." << endl;
 
 	// take new random point
-	double min_x = -200, min_y = -200;
-	double max_x = 200, max_y = 200;
-	for (auto& o: p.obstacles) {
-		if (o.c.c.x < min_x) min_x = o.c.c.x;
-		if (o.c.c.y < min_y) min_y = o.c.c.y;
-		if (o.c.c.x > max_x) max_x = o.c.c.x;
-		if (o.c.c.y > max_y) max_y = o.c.c.y;
-	}
 	hilare_a rp = p.begin_pos;
-	rp.x = frand(min_x, max_x);
-	rp.y = frand(min_y, max_y);
-	rp.theta = frand(-M_PI, M_PI);
-	rp.phi = frand(-M_PI, M_PI);
+
+	do {
+		double min_x = -200, min_y = -200;
+		double max_x = 200, max_y = 200;
+		for (auto& o: p.obstacles) {
+			if (o.c.c.x < min_x) min_x = o.c.c.x;
+			if (o.c.c.y < min_y) min_y = o.c.c.y;
+			if (o.c.c.x > max_x) max_x = o.c.c.x;
+			if (o.c.c.y > max_y) max_y = o.c.c.y;
+		}
+		rp.x = frand(min_x, max_x);
+		rp.y = frand(min_y, max_y);
+		rp.theta = frand(-M_PI, M_PI);
+		rp.phi = frand(-M_PI, M_PI);
+	} while (rp.intersects(p));
 
 	pts.push_back(rp);
 

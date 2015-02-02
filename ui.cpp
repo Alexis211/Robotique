@@ -12,6 +12,7 @@
 		- a : add obstacle
 		- d : delete obstacle under mouse pointer
 		- g : start solving
+		- f : follow trajectory mode
 	Select modes : no other keys
 */
 
@@ -28,14 +29,15 @@ UI::UI(hilare_a_param *p) : _sel_obs(vec(0,0), 0) {
 	_mode = M_NORMAL;
 
 	_got_sol = true;
+	_follow = false;
 }
 
 void UI::run() {
 	_settings.antialiasingLevel = 8;
 
-	_win.create(sf::VideoMode(800, 600), "PR", sf::Style::Default, _settings);
+	_win.create(sf::VideoMode(1000, 700), "PR", sf::Style::Default, _settings);
 	_win.setVerticalSyncEnabled(true);
-	_win.setFramerateLimit(30);
+	_win.setFramerateLimit(60);
 
 	while (_win.isOpen()) {
 		sf::Event ev;
@@ -61,6 +63,10 @@ void UI::run() {
 				} else if (k == 'g') {
 					_solver.start(_p);
 					_got_sol = false;
+				} else if (k == 'f') {
+					_follow = !_follow;
+					_follow_s = 0;
+					_follow_d = 0;
 				}
 			}
 
@@ -74,6 +80,8 @@ void UI::run() {
 			_got_sol = true;
 		}
 
+		if (_follow) do_follow();
+
 		_win.clear(sf::Color::Black);
 
 		render_internal();
@@ -84,6 +92,8 @@ void UI::run() {
 			render_circle(_sel_obs, sf::Color::Transparent, sf::Color::White, 0);
 		if (_mode == M_SEL_BEGIN || _mode == M_SEL_END)
 			render_pos(_sel_pos, sf::Color::White);
+
+		if (_follow) render_pos(_follow_pos, sf::Color::Cyan);
 
 		_win.display();
 	}
@@ -285,6 +295,65 @@ void UI::render_internal() {
 		for (auto kv2: kv.second) {
 			render_sol(kv2.second, sf::Color(42, 42, 42));
 		}
+	}
+}
+
+void UI::do_follow() {
+	if (_s.movement.size() == 0) return;
+
+	hilare_a_mvt &m = _s.movement[_follow_s];
+
+	int k = m.length() * _view.zoom / 2;
+	const int divide = (k >= 40 ? k : 40);
+
+	int s = _follow_d;
+
+	if (m.dtheta_before != 0) {
+		_follow_pos = m.from;
+		if (s < divide / 2) {
+			_follow_pos.theta += m.dtheta_before * s / (divide / 2);
+			_follow_pos.phi -= m.dtheta_before * s / (divide / 2);
+		} else {
+			s -= divide / 2;
+			s *= 2;
+
+			_follow_pos.theta += m.dtheta_before;
+			_follow_pos.phi -= m.dtheta_before;
+
+			if (m.is_arc) {
+				_follow_pos.theta += m.domega * s / divide;
+
+				vec p = m.center + vec::from_polar((m.from.pos() - m.center).norm(), (m.from.pos() - m.center).angle() + m.domega * s / divide);
+				_follow_pos.x = p.x;
+				_follow_pos.y = p.y;
+			} else {
+				_follow_pos.x = (s * m.to.x + (divide - s) * m.from.x) / divide;
+				_follow_pos.y = (s * m.to.y + (divide - s) * m.from.y) / divide;
+			}
+		}
+	} else {
+		_follow_pos = m.from;
+
+		if (m.is_arc) {
+			_follow_pos.theta += m.domega * s / divide;
+
+			vec p = m.center + vec::from_polar((m.from.pos() - m.center).norm(), (m.from.pos() - m.center).angle() + m.domega * s / divide);
+			_follow_pos.x = p.x;
+			_follow_pos.y = p.y;
+		} else {
+			_follow_pos.x = (s * m.to.x + (divide - s) * m.from.x) / divide;
+			_follow_pos.y = (s * m.to.y + (divide - s) * m.from.y) / divide;
+		}
+	}
+
+	_view.x0 = _follow_pos.x;
+	_view.y0 = _follow_pos.y;
+
+	_follow_d++;
+	if (_follow_d == divide) {
+		_follow_s++;
+		_follow_d = 0;
+		if (_follow_s == _s.movement.size()) _follow = false;
 	}
 }
 
